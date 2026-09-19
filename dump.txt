@@ -1,0 +1,25 @@
+
+graph_builder.add_node("planner", planner)
+graph_builder.add_node("researcher", researcher)
+graph_builder.add_node("feedback", feedback)
+graph_builder.add_node("writer", writer)
+
+
+graph_builder.add_edge(START, "planner")
+graph_builder.add_edge("planner", "researcher")
+graph_builder.add_conditional_edges(
+    "researcher",
+    route_after_research,
+    {"feedback": "feedback", "writer": "writer"},
+)
+graph_builder.add_edge("feedback", "researcher")
+graph_builder.add_edge("writer", END)
+
+graph = graph_builder.compile()
+
+image_bytes = graph.get_graph().draw_mermaid_png()
+
+with open("graph_tools.png", "wb") as f:
+    f.write(image_bytes)
+
+print("Graph image saved successfully as graph.png!")
