@@ -1,4 +1,4 @@
-from typing import TypedDict, List
+from typing import TypedDict, List, Annotated
 from pydantic import BaseModel, Field
 
 
@@ -7,12 +7,19 @@ class ResearchResult(TypedDict):
     findings: str
     # sources: list[str] populate once a real search tool is added
 
+def update_research_results(existing: List[ResearchResult], new: List[ResearchResult]) -> List[ResearchResult]:
+    """Merges new research results into existing state by query key."""
+    results_map = {item["query"]: item for item in existing}
+    for item in new:
+        results_map[item["query"]] = item        
+    return list(results_map.values())
+
 
 class State(TypedDict):
     topic: str
     queries: List[str]
     retry_cnt: int
-    result: List[ResearchResult]
+    result: Annotated[List[ResearchResult], update_research_results]
     is_sufficient: bool
     missing_queries: List[str]
     report: str

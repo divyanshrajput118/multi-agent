@@ -12,3 +12,4 @@ wheels/
 #Env Var
 .env
 roadmap.md
+trials.py

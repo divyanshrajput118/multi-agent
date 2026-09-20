@@ -1,5 +1,5 @@
 from langgraph.graph import StateGraph, START, END
-from .workflow import *
+from .agent import *
 
 graph_builder = StateGraph(State)
 
