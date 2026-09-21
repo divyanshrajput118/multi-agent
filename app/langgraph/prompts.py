@@ -9,9 +9,14 @@ def get_parallel_queries_prompt(topic: str):
 
 def get_research_prompt(query: str):
     return [
-            SystemMessage(content="""You are an AI assistant which generates one line about the query"""),
-            HumanMessage(content=f"query: {query}")
-        ]
+        SystemMessage(
+            content=(
+                "You are a research assistant. Your task is to use the provided search tool "
+                "to find factual information about the query."
+            )
+        ),
+        HumanMessage(content=f"Search for details on: {query}"),
+    ]
 
 def get_feedback_prompt(results):
     return [

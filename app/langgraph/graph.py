@@ -19,13 +19,13 @@ graph = graph_builder.compile()
 
 
 async def main():
-    state = {"topic": "What is a Elephant?"}
+    state = {"topic": "What is Black Cobra"}
     response = await graph.ainvoke(state)
     return response
 
 if __name__ == "__main__":
     response = asyncio.run(main())
-    print(response["missing_queries"])
+    print(response)
 
 
 

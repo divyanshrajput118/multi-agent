@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 class ResearchResult(TypedDict):
     query: str
     findings: str
-    # sources: list[str] populate once a real search tool is added
+    sources: list[str]
 
 def update_research_results(existing: List[ResearchResult], new: List[ResearchResult]) -> List[ResearchResult]:
     """Merges new research results into existing state by query key."""

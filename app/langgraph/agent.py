@@ -16,16 +16,20 @@ async def parallel_query_gen(state: State):
     
 
 async def researcher(state: State):
-    queries = state["queries"]
-    missing_queries = state["missing_queries"]
-
+    missing_queries = state.get("missing_queries")
+    queries = state.get("queries", [])
     queries_to_research = missing_queries if missing_queries else queries
-    tasks = [llm.ainvoke(get_research_prompt(query)) for query in queries_to_research]
-    response_ = await asyncio.gather(*tasks)
-    results: List[ResearchResult] = [
-        {"query": query, "findings": res.content}
-        for query, res in zip(queries_to_research, response_)
-    ]
+    tasks = [llm_with_tool.ainvoke(get_research_prompt(query)) 
+             for query in queries_to_research]
+    ai_messages = await asyncio.gather(*tasks)
+    tool_task = []
+    for msg in ai_messages:
+        if msg.tool_calls:
+            args = msg.tool_calls[0]["args"]
+            tool_task.append(search_web.ainvoke(args))
+
+    resposne_ = await asyncio.gather(*tool_task) 
+    results: List[ResearchResult] = resposne_
     return {"result": results}
 
 
