@@ -19,7 +19,7 @@ graph = graph_builder.compile()
 
 
 async def main():
-    state = {"topic": "What is Black Cobra"}
+    state = {"topic": "Who won champions trophy 2025 cricket"}
     response = await graph.ainvoke(state)
     return response
 

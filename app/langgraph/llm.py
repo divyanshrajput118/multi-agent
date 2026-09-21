@@ -9,7 +9,7 @@ small_llm = ChatOpenAI(model="gpt-4o-mini")
 large_llm = ChatOpenAI(model="gpt-4o")
 
 @tool
-def search_web(query_obj):
+def search_web(query: str):
     """
         Search the web for factual information related to the given query.
     
@@ -25,16 +25,16 @@ def search_web(query_obj):
     tool = TavilySearch(
                     max_results=1,
                     topic="general",)
-    result = tool.invoke(query_obj)
+    result = tool.invoke(query)
 
     if isinstance(result, dict) and "results" in result and result["results"]:
         data = result["results"][0]
         return {
-            "query": query_obj["query"],
+            "query": query,
             "findings": data.get("content", "No content found."),
             "sources": data.get("url", "No URL found."),
         }
-    return {"query": query_obj["query"],
+    return {"query": query,
             "findings": "No content found.", 
             "sources": "No URL found."}
 
