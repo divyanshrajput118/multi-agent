@@ -15,42 +15,53 @@ def get_parallel_queries_prompt(topic: str):
                                 HumanMessage(content=f"topic: {topic}")
                             ]
 
-def get_research_prompt(query: str):
+def get_research_prompt(idx: int, query: str, context: str, url: str):
     return [
         SystemMessage(
             content=(
-                "You are a research assistant. Your task is to use the provided search tool "
-                "to find factual information about the query."
+                """You are a research assistant.
+                Your task is to provide the answer to the query with the given context
+                also preserve the index and url of the query correctly matched
+                and return the output"""
+                
             )
         ),
-        HumanMessage(content=f"Search for details on: {query}"),
+        HumanMessage(content=f"""Search for details on:
+                                    index: {idx}
+                                    query: {query}
+                                    context: {context}
+                                    url: {url}"""),
     ]
 
-def get_feedback_prompt(results):
+def get_judge_prompt(topic: str, item: dict):
     return [
         SystemMessage(
-            content="""You are a research quality evaluator.
+            content="""You are a strict, critical AI Judge evaluating search findings.
+                        Your task is to assign a score from 1 to 5 based on how well the finding answers the core topic.
 
-                        Evaluate the research findings provided by the user.
+                        CRITICAL SCORING RUBRIC:
+                        - Score 5: PERFECT & COMPLETE. Directly, comprehensively, and unambiguously answers the main topic goal.
+                        - Score 4: GOOD. Relevant and accurate, but missing minor details or context.
+                        - Score 3: WEAK. Contains related information, but DOES NOT directly answer the core question (e.g., gives team list instead of winner).
+                        - Score 2: POOR. Barely relevant, outdated, or incomplete.
+                        - Score 1: UNRELATED / IRRELEVANT.
 
-                        Your task is to:
-                        1. Check whether every research query has been adequately answered.
-                        2. Check whether the findings are relevant to their respective queries.
-                        3. Identify queries whose findings are weak, incomplete, vague, or missing.
-                        4. Decide whether the overall research is sufficient to write a report.
-
-                        Set is_sufficient to True only when all queries have adequate
-                        and relevant findings.
-
-                        If the research is insufficient, select and return ONLY the exact original 
-                        queries from the input that failed evaluation in missing_queries. 
-                        Do NOT write new queries or alter the existing query text.
+                        RULES:
+                        1. Be extremely critical. If the finding gives side information (e.g. schedule, team list) instead of answering the exact question (e.g. who won), you MUST give a score <= 3 and set `is_weak = True`.
+                        2. Do not assume facts that are not explicitly stated in the findings text.
                         """
-        ),
-        HumanMessage(
-            content=f"Research findings:\n{results}"
-        )
-    ]
+                            ),
+                            HumanMessage(
+                                content=f"""
+                        Overall Topic goal : {topic}
+                        Item to Evaluate are:
+                            Index: {item['idx']}
+                            Query Used: {item['query']}
+                            Findings: {item['findings']}
+
+                                        """
+                            )
+                        ]
 
 def get_writer_prompt(results):
     return [

@@ -1,11 +1,21 @@
-from typing import TypedDict, List, Annotated
+from typing import TypedDict, List, Annotated, Optional
 from pydantic import BaseModel, Field
 
 
 class ResearchResult(TypedDict):
+    idx: int
     query: str
     findings: str
     sources: list[str]
+
+class QueriesSchema(TypedDict):
+    idx: int
+    retry_query: str
+
+class ScoreSchema(TypedDict):
+    idx: int
+    score: int
+
 
 def update_research_results(existing: List[ResearchResult], new: List[ResearchResult]) -> List[ResearchResult]:
     """Merges new research results into existing state by query key."""
@@ -17,22 +27,34 @@ def update_research_results(existing: List[ResearchResult], new: List[ResearchRe
 
 class State(TypedDict):
     topic: str
-    queries: List[str]
-    retry_cnt: int
+    queries: List[QueriesSchema]
+    retry_queries = List[QueriesSchema]
+    attempt: int
     result: Annotated[List[ResearchResult], update_research_results]
-    is_sufficient: bool
-    missing_queries: List[str]
+    scores: List[ScoreSchema]
     report: str
 
+class QueriesSubSchemaPyD(BaseModel):
+    idx: int = Field(description="Index of the query")
+    query: str = Field(description="Queries Generated")
 
-class QueriesSchema(BaseModel):
-    queries: List[str] = Field(description="3 focused sub-queries")
+class QueriesSchemaPyD(BaseModel):
+    queries: List[QueriesSubSchemaPyD] = Field(description="3 focused sub-queries")
+
+
+class JudgeSchema(BaseModel):
+    idx: int = Field(description="Index of the original query")
+    score: int = Field(description="Score from 1 (poor) to 5 (excellent)")
+    improved_query: Optional[str] = Field(
+        default=None, 
+        description="Suggested refined search query if score is < 4"
+    )
 
 
 class FeedbackJudge(BaseModel):
-    is_sufficient: bool = Field(description="True if every query is answered correctly")
-    missing_queries: List[str] = Field(description="Queries which are weak and vague")
-    reasoning: str = Field(description="LLM judgement")
+    feedback: List[JudgeSchema] = Field(
+        description="List of evaluations corresponding to each research item"
+    )
 
 
 class ReportSection(BaseModel):

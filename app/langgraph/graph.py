@@ -1,25 +1,26 @@
 from langgraph.graph import StateGraph, START, END
-from .agent import *
+from .schema_state import State
+from .nodes import *
 
 graph_builder = StateGraph(State)
 
 graph_builder.add_node("parallel_query_gen", parallel_query_gen)
 graph_builder.add_node("researcher", researcher)
-graph_builder.add_node("feedback", feedback)
+graph_builder.add_node("my_judge", my_judge)
 graph_builder.add_node("writer", writer)
 
 graph_builder.add_edge(START, "parallel_query_gen")
 graph_builder.add_edge("parallel_query_gen", "researcher")
-graph_builder.add_conditional_edges("researcher", route_after_research, 
-                                    {"feedback": "feedback", "writer": "writer"})
-graph_builder.add_edge("feedback", "researcher")
+graph_builder.add_conditional_edges("researcher", router, 
+                                    {"my_judge": "my_judge", "writer": "writer"})
+graph_builder.add_edge("my_judge", "researcher")
 graph_builder.add_edge("writer", END)
 
 graph = graph_builder.compile()
 
 
 async def main():
-    state = {"topic": "Who won champions trophy 2025 cricket"}
+    state = {"topic": "What is a Jesse"}
     response = await graph.ainvoke(state)
     return response
 

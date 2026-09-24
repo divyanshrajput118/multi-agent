@@ -13,3 +13,4 @@ wheels/
 .env
 roadmap.md
 trials.py
+output.txt

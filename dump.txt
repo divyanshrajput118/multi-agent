@@ -1,23 +1,99 @@
+from .prompts import *
+import asyncio
+from .schema_state import *
+from .llm import *
+from .tools import search_web
+
+
+async def parallel_query_gen(state: State):
+    topic = state["topic"]
+    messages = get_parallel_queries_prompt(topic)
+    response = await query_llm.ainvoke(messages)
+    queries = [{"idx": idx, "query": obj.query} for idx, obj in enumerate(response.queries)]
+
+    return {
+            "queries": queries,
+            "attempt": 0
+            }
+    
+
+# async def researcher(state: State):
+#     queries = state["queries"]
+#     retry_queries = state["retry_queries"]
+
+#     search_queries = retry_queries if retry_queries else queries
+    
+#     tasks = [llm_with_tool.ainvoke(get_research_prompt(query)) 
+#              for query in search_queries]
+#     ai_messages = await asyncio.gather(*tasks)
+
+#     tool_task = []
+#     for idx, msg in enumerate(ai_messages):
+#         if msg.tool_calls:
+#             args = msg.tool_calls[0]["args"]
+#             tool_task.append(search_web.ainvoke(args, idx))
+
+#     resposne_ = await asyncio.gather(*tool_task) 
+#     results: List[ResearchResult] = resposne_
+#     return {"result": results}
+
+
+# async def route_after_research(state: State):
+#     if state["attempt"] >= 2:
+#         return "writer"
+#     else:
+#         return "feedback"
+
+
+# async def feedback(state: State):
+#     results = state["result"]
+#     response_= await llm_as_judge.ainvoke(
+#         get_feedback_prompt(results)
+#     )
+#     retry_query: RetryQueries = {
+#                     "idx": response_.idx,
+#                     "retry_query": response_.improved_query
+#     }
+
+#     scores: ScoreSchema = {
+#                     "idx": response_.idx,
+#                     "score": response_.score
+#     }
+ 
+#     return {
+#         "retry_queries": retry_query,
+#         "scores": scores,
+#         "attempt": state["attempt"] + 1
+#     }
+
+# async def writer(state: State):
+#     results = state["result"]
+#     prompt = get_writer_prompt(results)
+#     response_ = await writer_llm.ainvoke(prompt)
+#     return {
+#         "report": response_.model_dump_json()
+#     }
+
+
 async def researcher(state: State):
     queries = state["queries"]
-    missing_queries = state["missing_queries"]
+    coroutine = [search_web(item['query']) for item in queries]
+    search_results = await asyncio.gather(*coroutine)
+    search_queries = [research_llm.ainvoke(get_research_prompt(idx=item['idx'], 
+                                                               query=item['query'], 
+                                                               context=search_results[item['idx']].content,
+                                                               url=search_results[item['idx']].url)) 
+                                                               for item in queries]
+    outputs = await asyncio.gather(*search_queries)
+    result: List[Result] = outputs
+    return {
+        "attempt": state["attempt"] + 1,
+        "result": result
+    }
 
-    queries_to_research = missing_queries if missing_queries else queries
-    tasks = [llm.ainvoke(get_research_prompt(query)) for query in queries_to_research]
-    response_ = await asyncio.gather(*tasks)
-    results: List[ResearchResult] = [
-        {"query": query, "findings": res.content}
-        for query, res in zip(queries_to_research, response_)
-    ]
-    return {"result": results}
+
 
 
     
-graph = graph_builder.compile()
 
-image_bytes = graph.get_graph().draw_mermaid_png()
-
-with open("graph_tools.png", "wb") as f:
-    f.write(image_bytes)
-
-print("Graph image saved successfully as graph.png!")
+    
