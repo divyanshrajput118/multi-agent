@@ -1,0 +1,54 @@
+services:
+
+  app:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    container_name: rag-app
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+    command: sleep infinity
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - mongo-data:/data/db
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey-code
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey-volume-data:/data
+
+  valkeyinsight:
+    image: redis/redisinsight:latest
+    container_name: valkeyinsight-code
+    ports:
+      - "5540:5540"
+    volumes:
+      - valkeyinsight-data:/data
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: always
+    container_name: qdrant-code
+    ports:
+      - 6333:6333
+      - 6334:6334
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+volumes:
+  valkey-volume-data:
+  valkeyinsight-data:
+  mongo-data:
+  qdrant-data:

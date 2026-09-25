@@ -80,15 +80,15 @@ async def router(state: State):
 
 
 async def writer(state: State):
-    return state
-
-# async def writer(state: State):
-#     results = state["result"]
-#     prompt = get_writer_prompt(results)
-#     response_ = await writer_llm.ainvoke(prompt)
-#     return {
-#         "report": response_.model_dump_json()
-#     }
+    result = state["result"]
+    topic = state["topic"]
+    context = "\n\n".join(item['findings'] for item in result)
+    urls = [item['url'] for item in result]
+    response = await writer_llm.ainvoke(get_writer_prompt(topic, context, urls))
+    report = response.model_dump()
+    return {
+        "report": report
+    }
 
 
 

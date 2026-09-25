@@ -1,0 +1,16 @@
+{
+    "name": "RAG Project",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspace",
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ]
+        }
+    },
+
+    "postCreateCommand": "uv sync"
+}

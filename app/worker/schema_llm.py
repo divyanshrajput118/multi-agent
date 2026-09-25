@@ -31,3 +31,15 @@ class JudgeSchemaPyD(BaseModel):
     is_weak: bool = Field(description="True if score < 4, indicating the query needs rewriting strict boolean should be followed True/False")
     rewritten_query: Optional[str] = Field(default="",
                         description="A refined search query if the item is weak, else None")
+
+class ReportSchemaPyD(BaseModel):
+    heading: str
+    content: str
+    sources: List[str]
+
+
+class StructuredReportSchemaPyD(BaseModel):
+    title: str
+    introduction: str
+    sections: List[ReportSchemaPyD]
+    conclusion: str

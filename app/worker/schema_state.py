@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Annotated, Optional
+from typing import TypedDict, List, Optional
 
 class Query(TypedDict):
     idx: int
@@ -25,5 +25,4 @@ class State(TypedDict):
     attempt: int
     result: List[Result]
     judge_result: List[Judge]
-    # scores: List[ScoreSchema]
-    # report: str
+    report: dict
