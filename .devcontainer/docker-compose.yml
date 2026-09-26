@@ -2,7 +2,7 @@ services:
 
   app:
     image: ghcr.io/astral-sh/uv:python3.12-bookworm
-    container_name: rag-app
+    container_name: research-agent
     working_dir: /workspace
     volumes:
       - ..:/workspace
@@ -11,7 +11,7 @@ services:
   mongo:
     image: mongo:latest
     restart: always
-    container_name: mongo
+    container_name: mongo-code
     ports:
       - "27017:27017"
     environment:
@@ -37,18 +37,8 @@ services:
     volumes:
       - valkeyinsight-data:/data
 
-  qdrant:
-    image: qdrant/qdrant:latest
-    restart: always
-    container_name: qdrant-code
-    ports:
-      - 6333:6333
-      - 6334:6334
-    volumes:
-      - qdrant-data:/qdrant/storage
 
 volumes:
   valkey-volume-data:
   valkeyinsight-data:
   mongo-data:
-  qdrant-data:

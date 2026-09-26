@@ -11,6 +11,10 @@ wheels/
 
 #Env Var
 .env
-roadmap.md
-trials.py
-output.txt
+try/
+# roadmap.md
+# trials.ipynb
+# output.txt
+# graph_tools.png
+# dump.txt
+test.py
