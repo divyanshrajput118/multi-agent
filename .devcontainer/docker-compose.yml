@@ -6,6 +6,9 @@ services:
     working_dir: /workspace
     volumes:
       - ..:/workspace
+    ports:
+    - "8000:8000"
+    - "5500:5500"
     command: sleep infinity
 
   mongo:

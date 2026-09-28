@@ -5,8 +5,11 @@ const statusID = document.getElementById("return_id")
 const checkBtn = document.getElementById("check")
 const inputTaskId = document.getElementById("task_id")
 const downloadDiv = document.getElementById("download")
+const downloadBtn = document.getElementById("download-button")
 
-const API = "http://localhost:8000"
+const API = `http://${window.location.hostname}:8000`
+
+let readyTaskId = null
 
 async function postTopic(){
     const post_URL = `${API}/research`
@@ -42,14 +45,25 @@ checkBtn.addEventListener('click', async function (){
         statusSpan.textContent = "Enter a task id first"
         return
     }
-    downloadDiv.textContent = ""
     const data = await getResearch(taskID)
     statusSpan.textContent = "Your status: " + data.status
+
     if (data.report_ready) {
-            const link = document.createElement("a")
-            link.href = `${API}/research/${taskID}/pdf`
-            link.textContent = "Download report"
-            link.style.color = "antiquewhite"
-            downloadDiv.appendChild(link)
+            readyTaskId = taskID
+            downloadBtn.style.display = "inline-block"
+        } else {
+            readyTaskId = null
+            downloadBtn.style.display = "none"
         }
+})
+
+
+downloadBtn.addEventListener('click', async function(){
+    if (!readyTaskId) {
+        downloadDiv.textContent = "Report not ready"
+        return
+    }
+
+    window.location.href = `${API}/research/${readyTaskId}/pdf`
+    
 })
