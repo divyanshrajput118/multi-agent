@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path, HTTPException
+from fastapi import FastAPI, Path, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from .db import task_collection, TaskSchema
@@ -8,10 +8,14 @@ from .utils import create_pdf, save_to_disk
 from .input_schema import InputSchema
 import asyncio
 import os
+from .rate_limit.rate_limitter import limiter, RateLimitExceeded, _rate_limit_exceeded_handler
 
 
 
 app = FastAPI()
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -68,8 +72,10 @@ async def download_pdf(task_id: str = Path(..., description="ID of the task")):
     )
 
 
+
 @app.post("/research")
-async def research(input_data: InputSchema):
+@limiter.limit("2/minute")
+async def research(request: Request, input_data: InputSchema):
     topic = input_data.topic
     db_task = await task_collection.insert_one(document=TaskSchema(
                                                         topic=topic,

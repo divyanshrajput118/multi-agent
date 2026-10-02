@@ -23,9 +23,9 @@ async function postTopic(){
             body: JSON.stringify(data)
         })
 
-    const task_id = await response.json()
+    const result = await response.json()
     
-    return task_id.task_id
+    return result
 }
 
 async function getResearch(task_id){
@@ -34,9 +34,17 @@ async function getResearch(task_id){
     const data = await response.json()
     return data
 }
+
 submitBtn.addEventListener('click', async function () {
-    const currentTaskId = await postTopic()
-    statusID.textContent = "Task created: " + currentTaskId
+    const output_response = await postTopic()
+    if(output_response.task_id){
+        const currentTaskId = output_response.task_id
+        statusID.textContent = "Task created: " + currentTaskId
+    }
+
+    else{
+        statusID.textContent = "Error: " + output_response.error; 
+    }
 })
 
 checkBtn.addEventListener('click', async function (){
