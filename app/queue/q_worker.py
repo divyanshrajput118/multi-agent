@@ -3,7 +3,6 @@ from ..db import task_collection
 from bson import ObjectId
 import openai
 
-import time
 
 async def process_topic(topic: str, task_id: str):
 
@@ -13,7 +12,6 @@ async def process_topic(topic: str, task_id: str):
                 "status": "Processing"
             }
         })
-        start = time.time()
         state = {"topic": topic}
         response = await my_graph.ainvoke(state)
         await task_collection.update_one({"_id": ObjectId(task_id)}, {
@@ -22,9 +20,7 @@ async def process_topic(topic: str, task_id: str):
                     "report": response['report']
                 }
             })
-        end = time.time()
-
-        print(f"time to process {end - start}")
+    
         
 
     except openai.APIStatusError as e:
